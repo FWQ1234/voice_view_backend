@@ -154,6 +154,45 @@ class CityWalkAgent:
     def conversation_reset(self):
         self.conversation = []
 
+        
+    def get_wikipedia_article(self, query):
+
+        # Step 1: Perform the search to get article snippets
+        search_url = "https://en.wikipedia.org/w/api.php"
+        search_params = {
+            'action': 'query',
+            'list': 'search',
+            'srsearch': query,  # Replace with your search term
+            'format': 'json'
+        }
+
+        search_response = requests.get(search_url, params=search_params)
+        search_data = search_response.json()
+
+        # Check if search results are available
+        if search_data.get('query') and search_data['query'].get('search'):
+            first_result = search_data['query']['search'][0]
+            pageid = first_result['pageid']
+            
+            # Step 2: Retrieve the full article content using the pageid
+            article_url = "https://en.wikipedia.org/w/api.php"
+            article_params = {
+                'action': 'query',
+                'prop': 'extracts',
+                'pageids': pageid,
+                'explaintext': True,  # Returns plain text; remove for HTML content
+                'format': 'json'
+            }
+            
+            article_response = requests.get(article_url, params=article_params)
+            article_data = article_response.json()
+            
+            # The extract is contained in the pages object, with the key as the pageid
+            full_article = article_data['query']['pages'][str(pageid)]['extract']
+            return full_article
+        else:
+            return ""
+
     def get_nearby_landmarks(self, city):
 
         headers = {
@@ -329,7 +368,9 @@ class CityWalkAgent:
             location = loc_info['location']
             location_info = self.search_location(location)
             additional_info['location_info'] = {location: location_info}
-            
+            additional_info['location_info']['wikipedia'] = self.get_wikipedia_article(location)
+        else:
+            additional_info['general_info'] = {'wikipedia': self.get_wikipedia_article(query)}
         new_system_prompt = {
             "role": "system",
             "content": self.system_prompt['content']
