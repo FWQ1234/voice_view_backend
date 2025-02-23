@@ -43,7 +43,7 @@ async def answer(query: str, metadata: MetaData = None) -> CityWalkResponse:
     try:
         if metadata.is_first_request:
             agent.conversation_reset()
-        return agent.answer(query, metadata)
+        return agent.answer(query, metadata, metadata.is_first_request)
     except Exception as e:
         print(f"Error talking to agent: {str(e)}")
         return HTTPException(status_code=500, detail=str(e))

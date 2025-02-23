@@ -86,17 +86,19 @@ class Preferences(pydantic.BaseModel):
     profession: str
     visited: list[str]
 
-
+class Language(pydantic.BaseModel):
+    language: str
 
 class CityWalkAgent:
     def __init__(self):
         self.memory = {}
+        self.language = "english"
         self.conversation = {}
         self.client = OpenAI()
         self.system_prompt =  {
                 "role": "system",
                 "content": """
-            Use same language as the user.
+            Your speech should ALWAYS be in the language {language}.
             Once conversation started do NOT switch languages, unless the user asks you to switch explicitly. DO NOT switch even if the user uses a different language.
             English is not the only language you support.
             You are a professional Personal Tour Guide. You are taking a visitor on a city walk. 
@@ -197,6 +199,37 @@ class CityWalkAgent:
             return full_article
         else:
             return ""
+
+
+
+    def language_detection(self, query):
+        # use the query to determine the language
+        system_prompt = """
+            You will be provided with the user query.
+            based on the user query. Classify the language of the user query.
+
+            return the language type in the following json format:
+            {{
+                "language": "language"
+            }}
+
+            USER QUERY:
+            {query}
+        """
+
+        completion = self.client.beta.chat.completions.parse(
+            model="gpt-4o",
+            temperature=1,
+            max_tokens=100,
+            top_p=1,
+            messages=[{
+                "role": "system",
+                "content": system_prompt.format(query=query)
+            }],
+            response_format=Language
+        )
+
+        return completion.choices[0].message.dict()['parsed']['language']
 
     def get_nearby_landmarks(self, city):
 
@@ -348,7 +381,9 @@ class CityWalkAgent:
 
 
 
-    def answer(self, query, metadata):
+    def answer(self, query, metadata, first_request):
+        if first_request:
+            self.language = self.language_detection(query)
         city = metadata.city.dict()
         # time to get the landmarks
         start = time.time()
@@ -380,7 +415,7 @@ class CityWalkAgent:
             "role": "system",
             "content": self.system_prompt['content']
         }
-        new_system_prompt['content'] = new_system_prompt['content'].format(additional_info=json.dumps(additional_info))
+        new_system_prompt['content'] = new_system_prompt['content'].format(additional_info=json.dumps(additional_info), language=self.language)
 
             
 
