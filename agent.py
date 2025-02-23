@@ -97,7 +97,7 @@ class CityWalkAgent:
                 "role": "system",
                 "content": """
             Use same language as the user.
-            Once conversation started do NOT switch languages, unless the user switches first or asks you to.
+            Once conversation started do NOT switch languages, unless the user asks you to switch explicitly. DO NOT switch even if the user uses a different language.
             English is not the only language you support.
             You are a professional Personal Tour Guide. You are taking a visitor on a city walk. 
             You will be provided with a list of information about the city and the visitor's interests.
