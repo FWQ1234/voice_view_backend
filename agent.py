@@ -89,6 +89,9 @@ class Preferences(pydantic.BaseModel):
 class Language(pydantic.BaseModel):
     language: str
 
+class Translation(pydantic.BaseModel):
+    translated_text: str
+
 class CityWalkAgent:
     def __init__(self):
         self.memory = {}
@@ -379,11 +382,44 @@ class CityWalkAgent:
         
         return completion.choices[0].message.dict()['parsed']
 
+    def translate(self, text):
+        # translate the text to the user language
+        system_prompt = """
+            You will be provided with the text that needs to be translated to the target language.
+            Translate the text to the language of the user query.
+
+            return the translated text in the following json format:
+            {{
+                "translated_text": "translated text"
+            }}
+
+            TARGET LANGUAGE:
+            {target_language}
+
+            TEXT TO TRANSLATE:
+            {text}
+        """
+
+        completion = self.client.beta.chat.completions.parse(
+            model="gpt-4o",
+            temperature=1,
+            max_tokens=500,
+            top_p=1,
+            messages=[{
+                "role": "system",
+                "content": system_prompt.format(text=text, target_language=self.language)
+            }],
+            response_format=Translation
+        )
+
+        return completion.choices[0].message.dict()['parsed']['translated_text']
 
 
     def answer(self, query, metadata, first_request):
         if first_request:
             self.language = self.language_detection(query)
+        else:
+            query = self.translate(query)
         city = metadata.city.dict()
         # time to get the landmarks
         start = time.time()
@@ -420,9 +456,9 @@ class CityWalkAgent:
             
 
         completion = self.client.beta.chat.completions.parse(
-            model="o3-mini",
+            model="gpt-4o",
             temperature=1,
-            # max_tokens=4000,
+            max_tokens=4000,
             top_p=1,
             messages=[new_system_prompt] + self.conversation + [new_message],
             response_format=CityWalkResponse
