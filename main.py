@@ -1,10 +1,12 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 import os
 from dotenv import load_dotenv
 import openai
 import json
+from agent import CityWalkAgent, CityWalkResponse
 
 # 加载环境变量
 load_dotenv()
@@ -13,6 +15,16 @@ load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+agent = CityWalkAgent()
 
 class Landmark(BaseModel):
     name: str
@@ -33,6 +45,15 @@ class LandmarkRequest(BaseModel):
 
 class LandmarkResponse(BaseModel):
     response_text: str
+
+class City(BaseModel):
+    name: str
+    latitude: float
+    longitude: float
+
+class MetaData(BaseModel):
+    city: City
+    is_first_request: bool
 
 def read_reddit_discussions(city: str) -> str:
     """
@@ -114,6 +135,19 @@ async def process_landmark(request: LandmarkRequest):
         return LandmarkResponse(response_text=description)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/answer", response_model=CityWalkResponse)
+async def answer(query: str, metadata: MetaData = None) -> CityWalkResponse:
+    """
+    调用CityWalkAgent回答问题
+    """
+    try:
+        if metadata.is_first_request:
+            agent.conversation_reset()
+        return agent.answer(query, metadata)
+    except Exception as e:
+        print(f"Error talking to agent: {str(e)}")
+        return HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
