@@ -3,6 +3,7 @@ import json
 import pydantic
 import requests
 import time
+import os
 
 
 class Location(pydantic.BaseModel):
@@ -150,8 +151,7 @@ class CityWalkAgent:
 
         headers = {
             'Content-Type': 'application/json',
-            'X-Goog-Api-Key': 'AIzaSyAE7Pb7MSZTljD-xh8XFAd7Oumyoys4FK8',
-            # 'X-Goog-Api-Key': 'AIzaSyAO3gDfyhazSW1_5SFhn3q8iZRrwUjxQVU',
+            'X-Goog-Api-Key': os.getenv('GOOGLE_API_KEY'),
             'X-Goog-FieldMask': 'places.displayName,places.location,places.rating',
         }
 
