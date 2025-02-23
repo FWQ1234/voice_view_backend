@@ -420,9 +420,9 @@ class CityWalkAgent:
             
 
         completion = self.client.beta.chat.completions.parse(
-            model="gpt-4o",
+            model="o3-mini",
             temperature=1,
-            max_tokens=4000,
+            # max_tokens=4000,
             top_p=1,
             messages=[new_system_prompt] + self.conversation + [new_message],
             response_format=CityWalkResponse
