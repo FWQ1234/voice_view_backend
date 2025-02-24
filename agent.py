@@ -122,7 +122,7 @@ class CityWalkAgent:
             JSON example 1: location recommnedations:
             {{
                 "locations": ['location 1', 'location 2', 'location 3', ..., 'location N'],
-                "speech": "Hi, what about try talking a walk from location 1 to location N? it should take you about 2 hours and you will see some interesting places on the way."
+                "speech": "Based on your preferences, what about try talking a walk from location 1 to location N? it should take you about 2 hours and you will see some interesting places on the way."
             }}
 
             JSON example 2: clarifying questions: the goal is to get more information from the visitor to refine the recommendations
@@ -148,7 +148,7 @@ class CityWalkAgent:
             !important: avoid making drastic changes to the recommendations
             {{
                 "locations": ['location 1', 'location 2', 'location 3', ..., 'location N'], # it's important to keep the order of the locations similar to the original recommendations
-                "speech": "Based on what you told me, I think you would enjoy visiting location 1, location 2, and location N. Would you like to know more about these places?"
+                "speech": "Based on what your preferences, I think you would enjoy visiting location 1, location 2, and location N. Would you like to know more about these places?"
             }}
 
             JSON examples 6: reset conversation: reset the conversation to the beginning, for example, if the visitor's says something like let's restart, start over, etc.
