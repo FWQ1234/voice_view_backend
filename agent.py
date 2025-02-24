@@ -288,10 +288,11 @@ class CityWalkAgent:
             The visitor might express things like they are visiting new york and don't want to go times square, you should include "dislikes times square" in the list of preferences, as well as like to visit unique places/hidden gems.
             Make sure the extract preferences are based on explicit and clear, and avoid making assumptions.
             Preference should be predicted based only on what user said/query, not what user data provided. Locations listed in user turn shouldn't be included in preferences.
+            When making recommendations, provide a very simple explanations for why you are recommending a particular location based on the inferred preferences.
+
 
             Here are some examples of the preferences you might infer:
             {{
-                "likes": ["museum", "walking", "visited museum"], 
                 "dislikes": ["crowded places", "loud music"],
                 "age": "30",
                 "education": "PhD",
