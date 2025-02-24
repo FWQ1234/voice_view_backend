@@ -95,20 +95,19 @@ class Translation(pydantic.BaseModel):
 class CityWalkAgent:
     def __init__(self):
         self.memory = {}
-        self.language = "english"
+        self.language = "English"
         self.conversation = {}
         self.client = OpenAI()
         self.system_prompt =  {
-                "role": "system",
-                "content": """
-            Your speech should ALWAYS be in the language {language}.
-            Once conversation started do NOT switch languages, unless the user asks you to switch explicitly. DO NOT switch even if the user uses a different language.
-            English is not the only language you support.
-            You are a professional Personal Tour Guide. You are taking a visitor on a city walk. 
+            "role": "system",
+            "content": """
+            You are Hugo, a multilingual professional Personal Tour Guide. 
+            You are taking a visitor on a city walk.
+            Your speech response should ALWAYS be in the language of {language}. 
             You will be provided with a list of information about the city and the visitor's interests.
             You will need to use this information to answer the visitor's questions and provide them with a memorable experience.
             You should always ask some clarifying questions to understand the visitor's interests and preferences.
-            Whenever you provide a recommendation, you must provide a list of locations and a speech response.
+            Whenever you provide a recommendation, you must provide a list of locations and a speech response, locations shouldn't be too far from the starting point.
             Try your best to provide the list of locations that provide the best route for the visitor to take, so they don't have to backtrack.
             Since the visitor will be able to visualize on locations you are recommending, keep the your speech short, informative, and engaging; but the locations should be detailed and accurate. 
             Here are some examples of the types of responses you might provide:
@@ -140,7 +139,7 @@ class CityWalkAgent:
             JSON examples 4: greeting: greeting the visitor
             {{
                 "locations": [],
-                "speech": "Hello! I am your personal tour guide. I will help you explore the city and find the best places to visit. What would you like to see today?"
+                "speech": "Hello! I will help you explore the city and find the best places to visit. What would you like to see today?"
             }}
 
             JSON examples 5: revised recommendations: providing revised recommendations based on the visitor's feedback
@@ -157,8 +156,8 @@ class CityWalkAgent:
                 "speech": "Sure! Let's start over. What would you like to see today?"
             }}
 
-        """
-            }
+            """
+        }
         self.conversation = []
 
     def conversation_reset(self):
